@@ -107,6 +107,14 @@ function inicarApp(){
             recetaButton.classList.add('btn', 'btn-danger', 'w-100');
             recetaButton.textContent = 'Ver Receta';
 
+            /* Conecta el modal de boostrap */
+            /* recetaButton.dataset.bsTarget = "#modal";
+            recetaButton.dataset.bsToggle = "modal";  */
+
+            recetaButton.onclick = function (){
+                seleccionarReceta(idMeal);
+            }
+
 
             //Insertar receta en el HTML
             recetaCardBody.appendChild(recetaHeading);
@@ -123,11 +131,30 @@ function inicarApp(){
         
     }
 
+
+
+    function seleccionarReceta(id){
+        console.log('id :>> ', id);
+        const url = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`;
+        
+        fetch(url)
+            .then(respuesta =>{
+                console.log('respuesta', respuesta);
+                return respuesta.json();
+            })
+             .then(resultado =>{
+                mostrarRecetaModal(resultado.meals[0])
+            }) 
+    }
+
+    function mostrarRecetaModal(receta){
+        const {} = receta;
+    }
     function limpiarHTML (selector){
         while(selector.firstChild){
             selector.removeChild(selector.firstChild);
         }
-    }
+    };
 }
 
 document.addEventListener("DOMContentLoaded",inicarApp);
