@@ -189,9 +189,26 @@ function inicarApp(){
         limpiarHTML(modalFooter);
         const btnFavorito = document.createElement('BUTTON');
         btnFavorito.classList.add('btn', 'btn-danger', 'col');
-        btnFavorito.textContent = 'Guardar Favorito';
-        modalFooter.appendChild(btnFavorito);
+        btnFavorito.textContent = existeStorage(idMeal) ? 'Agregar Favorito' : 'Eliminar Favorito';
+       
+        
+        //LocalStorage
+        btnFavorito.onclick = ()=>{
+            
 
+            if(existeStorage(idMeal)){
+                eliminarFavorito(idMeal);
+                btnFavorito.textContent = 'Agregar Favorito';
+                return
+            }
+            agregarFavorito({
+                id: idMeal,
+                titulo : strMeal,
+                img: strMealThumb
+
+            });
+            btnFavorito.textContent = 'Eliminar Favorito';
+        }
 
         const btnCerrarModal = document.createElement('BUTTON');
         btnCerrarModal.classList.add('btn', 'btn-secondary', 'col');
@@ -199,11 +216,30 @@ function inicarApp(){
         btnCerrarModal.onclick = () =>{
             modal.hide();
         }
+
+        modalFooter.appendChild(btnFavorito);
         modalFooter.appendChild(btnCerrarModal);
 
 
         /* Muestra modal */
         modal.show();
+    }
+
+    function agregarFavorito(receta) {
+        console.log('Agregando', receta);
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? []; /* ?? quiere decir que en caso de que la expresion devuelva un null, se va a tomar el valor del lado derecho en este caso un array vacio */
+
+        localStorage.setItem('favoritos', JSON.stringify([...favoritos, receta]));
+    }
+
+    function eliminarFavorito(id) {
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        const nuevosFavoritos = favoritos.filter(favorito => favorito.id !== id);
+        localStorage.setItem('favoritos', JSON.stringify(nuevosFavoritos));
+    }
+    function existeStorage(id) {
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        return favoritos.some(favorito =>favorito.id === id);
     }
     function limpiarHTML (selector){
         while(selector.firstChild){
