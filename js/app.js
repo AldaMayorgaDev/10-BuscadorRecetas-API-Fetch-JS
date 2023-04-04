@@ -1,14 +1,25 @@
 function inicarApp(){
-    const selectCategorias = document.querySelector('#categorias');
-    selectCategorias.addEventListener('change', selectCategoria);
-
     const divResultado = document.querySelector('#resultado');
+    const selectCategorias = document.querySelector('#categorias');
+
+    if(selectCategorias){
+        selectCategorias.addEventListener('change', selectCategoria);
+        obtenerCategorias();
+    }
+    
+    const favoritosDiv = document.querySelector('.favoritos');
+    if (favoritosDiv) {
+        obtenerFavoritos();
+    }
+
+    
+
 
     const modal = new bootstrap.Modal('#modal', {});
 
     //Obtener todas las categorias de la API, usando el siguiente endpoint www.themealdb.com/api/json/v1/1/categories.php
     
-    obtenerCategorias();
+    
 
     function obtenerCategorias(){
         const url = 'https://www.themealdb.com/api/json/v1/1/categories.php';
@@ -16,12 +27,12 @@ function inicarApp(){
         /* Consumiendo la API con fetch */
         fetch(url)
             .then(respuesta =>{
-                console.log('respuesta', respuesta);
+                //console.log('respuesta', respuesta);
                 return respuesta.json(); //Retornamos la respuesta en formato JSON
             })
             .then(resultado =>{
-                console.log('resultado', resultado);
-                console.log('resultado.categories', resultado.categories)
+                //console.log('resultado', resultado);
+                //console.log('resultado.categories', resultado.categories)
                 mostrarCategorias(resultado.categories); //Se envia el array a la funcion mostrarCategorias 
             })
             .catch(error =>{
@@ -51,10 +62,10 @@ function inicarApp(){
     }
 
     function selectCategoria(e) {
-        console.log('e.target.value :>> ', e.target.value);
+        //console.log('e.target.value :>> ', e.target.value);
         const categoria = e.target.value;
         const url = `https://www.themealdb.com/api/json/v1/1/filter.php?c=${categoria}`;
-        console.log('url :>> ', url);
+        //console.log('url :>> ', url);
 
         /* Consumiendo API que filtra los resultados por categoria  a traves del endpoint https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood*/
 
@@ -64,7 +75,7 @@ function inicarApp(){
                 return respuesta.json();
             })
             .then(resultado=>{
-                console.log('resultado :>> ', resultado);
+               // console.log('resultado :>> ', resultado);
                 mostrarRecetas(resultado.meals);
             })
     }
@@ -94,8 +105,8 @@ function inicarApp(){
 
             const recetaImagen = document.createElement('IMG');
             recetaImagen.classList.add('card-img-top');
-            recetaImagen.alt = `Imagen de la receta ${strMeal}`;
-            recetaImagen.src = strMealThumb;
+            recetaImagen.alt = `Imagen de la receta ${strMeal ?? receta.img}`;
+            recetaImagen.src = strMealThumb ?? receta.img;
 
 
             const recetaCardBody = document.createElement('DIV');
@@ -103,7 +114,7 @@ function inicarApp(){
 
             const recetaHeading = document.createElement('H3');
             recetaHeading.classList.add('card-title', 'mb-3');
-            recetaHeading.textContent = strMeal;
+            recetaHeading.textContent = strMeal ?? receta.titulo;
 
             const recetaButton = document.createElement('BUTTON');
             recetaButton.classList.add('btn', 'btn-danger', 'w-100');
@@ -114,7 +125,7 @@ function inicarApp(){
             recetaButton.dataset.bsToggle = "modal";  */
 
             recetaButton.onclick = function (){
-                seleccionarReceta(idMeal);
+                seleccionarReceta(idMeal ?? receta.id);
             }
 
 
@@ -136,12 +147,12 @@ function inicarApp(){
 
 
     function seleccionarReceta(id){
-        console.log('id :>> ', id);
+        //console.log('id :>> ', id);
         const url = `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`;
         
         fetch(url)
             .then(respuesta =>{
-                console.log('respuesta', respuesta);
+                //console.log('respuesta', respuesta);
                 return respuesta.json();
             })
              .then(resultado =>{
@@ -176,7 +187,7 @@ function inicarApp(){
                 const ingredienteLi = document.createElement('LI');
                 ingredienteLi.classList.add('list-group-item');
                 ingredienteLi.textContent = `${ingrediente} - ${cantidad}`;
-                console.log(`${ingrediente} - ${cantidad}`);
+                //console.log(`${ingrediente} - ${cantidad}`);
 
                 listGroup.appendChild(ingredienteLi);
             }
@@ -228,7 +239,7 @@ function inicarApp(){
     }
 
     function agregarFavorito(receta) {
-        console.log('Agregando', receta);
+        //console.log('Agregando', receta);
         const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? []; /* ?? quiere decir que en caso de que la expresion devuelva un null, se va a tomar el valor del lado derecho en este caso un array vacio */
 
         localStorage.setItem('favoritos', JSON.stringify([...favoritos, receta]));
@@ -251,6 +262,21 @@ function inicarApp(){
 
         toastBody.textContent = mensaje;
         toast.show();
+    }
+
+
+    function obtenerFavoritos() {
+        const favoritos = JSON.parse(localStorage.getItem('favoritos')) ?? [];
+        if(favoritos.length){
+
+            mostrarRecetas(favoritos);
+            return
+        }
+            const noFavoritos = document.createElement('P');
+            noFavoritos.classList.add('fs-4', 'text-center', 'font-bold', 'mt-5');
+            noFavoritos.textContent = 'No Hay Favoritos Aún';
+            favoritosDiv.appendChild(noFavoritos);
+        
     }
     function limpiarHTML (selector){
         while(selector.firstChild){
